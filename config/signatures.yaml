@@ -1,0 +1,65 @@
+# =========================================================
+# Lightweight signature ruleset — mimics Suricata/Snort logic
+# so we have a fair, explainable baseline to compare the LLM
+# and ML detectors against.
+#
+# Each rule is evaluated against an aggregated "flow window"
+# (see src/features/feature_extractor.py for the schema).
+# =========================================================
+
+rules:
+  - id: SIG-1001
+    name: "Port Scan (Horizontal)"
+    description: "Single source touching many distinct destination ports in a short window"
+    condition: "unique_dst_ports > 20 and duration_seconds < 10"
+    severity: "medium"
+    mitre: "T1046 - Network Service Discovery"
+
+  - id: SIG-1002
+    name: "SYN Flood"
+    description: "High ratio of SYN packets without completed handshakes from one source"
+    condition: "syn_count > 200 and syn_ack_ratio < 0.1"
+    severity: "high"
+    mitre: "T1499 - Endpoint Denial of Service"
+
+  - id: SIG-1003
+    name: "DNS Tunneling Indicator"
+    description: "Abnormally large / high-entropy DNS query volume to a single domain"
+    condition: "dns_query_count > 100 and avg_dns_query_length > 40"
+    severity: "high"
+    mitre: "T1071.004 - Application Layer Protocol: DNS"
+
+  - id: SIG-1004
+    name: "Data Exfiltration (Large Outbound Transfer)"
+    description: "Sustained large outbound byte volume to an external, previously-unseen host"
+    condition: "bytes_out > 50000000 and dst_is_new_host == True"
+    severity: "critical"
+    mitre: "T1041 - Exfiltration Over C2 Channel"
+
+  - id: SIG-1005
+    name: "Brute Force Login Attempt"
+    description: "Many short-lived connections to an authentication port (22/3389/21)"
+    condition: "dst_port in [22, 3389, 21] and connection_count > 15 and avg_duration < 3"
+    severity: "medium"
+    mitre: "T1110 - Brute Force"
+
+  - id: SIG-1006
+    name: "Command & Control Beaconing"
+    description: "Highly regular, low-jitter periodic connections to the same external IP"
+    condition: "beacon_score > 0.85"
+    severity: "high"
+    mitre: "T1071 - Application Layer Protocol (C2)"
+
+  - id: SIG-1007
+    name: "Suspicious Unencrypted Protocol on Non-Standard Port"
+    description: "Plaintext HTTP-like traffic observed on a non-80/8080 port"
+    condition: "protocol == 'HTTP' and dst_port not in [80, 8080, 8000]"
+    severity: "low"
+    mitre: "T1071.001 - Web Protocols"
+
+  - id: SIG-1008
+    name: "ICMP Flood"
+    description: "Excessive ICMP echo requests from a single source"
+    condition: "icmp_count > 500"
+    severity: "medium"
+    mitre: "T1499.002 - Service Exhaustion Flood"

@@ -1,0 +1,47 @@
+# =========================================================
+# LLM-IDS Configuration
+# =========================================================
+
+capture:
+  mode: "simulate"          # "live" (scapy/pyshark) or "simulate" (synthetic traffic generator)
+  interface: "eth0"         # used only when mode == "live"
+  window_seconds: 5         # size of the traffic aggregation window fed to detectors
+  max_packets_per_window: 2000
+
+features:
+  flow_timeout_seconds: 60
+  top_n_ports: 10
+
+signature_engine:
+  rules_file: "config/signatures.yaml"
+
+ml_classifier:
+  model_path: "data/models/rf_classifier.joblib"
+  scaler_path: "data/models/scaler.joblib"
+  contamination: 0.08        # expected anomaly rate (for the IsolationForest fallback)
+  retrain_on_start: true
+
+llm_analyzer:
+  provider: "anthropic"      # anthropic | openai
+  anthropic_model: "claude-sonnet-4-6"
+  openai_model: "gpt-4o"
+  max_tokens: 1024
+  temperature: 0.2
+  min_severity_to_call_llm: "low"   # avoid burning tokens on trivial traffic if desired
+
+rag:
+  knowledge_dir: "src/rag/threat_docs"
+  top_k: 3
+
+alerts:
+  storage: "sqlite"
+  db_path: "data/ids.db"
+  severity_levels: ["info", "low", "medium", "high", "critical"]
+
+dashboard:
+  refresh_seconds: 4
+  title: "LLM-IDS — AI-Powered Intrusion Detection"
+
+voice_assistant:
+  enabled: false
+  wake_phrase: "hey sentinel"

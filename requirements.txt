@@ -1,0 +1,31 @@
+# Python>=3.10
+
+# Core
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.4
+pyyaml>=6.0
+python-dotenv>=1.0
+joblib>=1.3
+
+# Packet capture (optional — code degrades gracefully to simulator if unavailable)
+scapy>=2.5.0
+pyshark>=0.6
+
+# LLM providers
+anthropic>=0.34.0
+openai>=1.40.0
+
+# RAG (lightweight, no external vector DB required)
+scikit-learn>=1.4        # TF-IDF retrieval backend
+
+# Dashboard
+streamlit>=1.37
+plotly>=5.22
+
+# Voice assistant (bonus — optional extra)
+SpeechRecognition>=3.10
+pyttsx3>=2.90
+
+# Storage
+sqlalchemy>=2.0
